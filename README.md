@@ -34,19 +34,7 @@ El objetivo del proyecto es diseñar, construir y programar un dron funcional, i
 - **Módulo GPS NEO-6M**
 - **Step-up MT3608 + batería Li-Po 3.7 V**
 
-## 📁 Estructura del repositorio
 
-```text
-├── /drivers              # Scripts de control de los motores (PWM)
-├── /imu                  # Lectura del sensor MPU6050
-├── /gps                  # Captura y procesamiento de datos del módulo GPS
-├── /camera               # Código para la ESP32-CAM y streaming por IP
-├── /tests                # Pruebas iniciales de cada subsistema
-├── /web_interface        # Interfaz en Flask para control remoto
-├── /images               # Capturas de pruebas, conexiones y prototipos
-├── main.py               # Script principal (integración de subsistemas)
-└── README.md             # Este archivo
-```
 
 ## ⚙️ Requisitos
 Python 3.8 o superior
