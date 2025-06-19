@@ -1,1 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Control del Dron</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.9.0/nipplejs.min.js"></script>
+</head>
+<body>
+    <h1>Control del Dron</h1>
+    <div class="stop-container">
+        <button id="stop-btn" onclick="confirmarStop()">🛑 STOP</button>
+    </div>
+
+    <div id="status" class="status-box">🟢 Esperando comando...</div>
+
+    <div id="gps-info" class="gps-box">
+        <p><strong>🛰️ GPS:</strong></p>
+        <p>Hora: <span id="gps-hora">-</span></p>
+        <p>Lat: <span id="gps-lat">-</span></p>
+        <p>Lon: <span id="gps-lon">-</span></p>
+        <p>Vel: <span id="gps-vel">-</span> nudos</p>
+    </div>
+
+    <div id="gps-info" class="gps-box">
+        <p><strong>🛰️ GPS:</strong></p>
+        <p>Hora: <span id="gps-hora">-</span></p>
+        <p>Lat: <span id="gps-lat">-</span></p>
+        <p>Lon: <span id="gps-lon">-</span></p>
+        <p>Vel: <span id="gps-vel">-</span> nudos</p>
+    </div>
+
+    
+    <div class="joystick-container">
+        <div class="joystick-box">
+            <p class="joystick-label">Movimiento<br>adelante / atrás / izquierda / derecha</p>
+            <div id="joystick-left" class="joystick-area"></div>
+        </div>
+        <div class="joystick-box">
+            <p class="joystick-label">Altura y giro<br>subir / bajar / girar izq / girar der</p>
+            <div id="joystick-right" class="joystick-area"></div>
+        </div>
+    </div>
+    
+
+    <script>
+        function actualizarEstado(texto) {
+            document.getElementById("status").innerText = "🟢 " + texto;
+    }
+
+        function enviarComando(comando) {
+            actualizarEstado("Ejecutando: " + comando);
+            fetch("/accion", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
+                },
+                body: "comando=" + comando
+            });
+        }
+
+
+        function crearJoystick(id, onDireccion) {
+            const zone = document.getElementById(id);
+            const joystick = nipplejs.create({
+                zone: zone,
+                mode: 'static',
+                position: { left: '50%', top: '50%' },
+                color: 'white'
+            });
+
+            let ultima = "";
+
+            joystick.on('dir', (evt, data) => {
+                const dir = data.direction.angle;
+                if (dir !== ultima) {
+                    onDireccion(dir);
+                    ultima = dir;
+                }
+            });
+
+            joystick.on('end', () => {
+                enviarComando("parar");
+                ultima = "";
+            });
+        }
+
+        // Joystick izquierdo – adelante/atrás/izq/der
+        crearJoystick("joystick-left", (dir) => {
+            const mapa = {
+                up: "adelante",
+                down: "atras",
+                left: "izquierda",
+                right: "derecha"
+            };
+            if (dir in mapa) {
+                enviarComando(mapa[dir]);
+            }
+        });
+
+        // Joystick derecho – girar/subir/bajar
+        crearJoystick("joystick-right", (dir) => {
+            const mapa = {
+                up: "subir",
+                down: "bajar",
+                left: "girar_izq",
+                right: "girar_der"
+            };
+            if (dir in mapa) {
+                enviarComando(mapa[dir]);
+            }
+        });
+    function actualizarGPS() {
+        fetch('/gps')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById("gps-hora").innerText = data.hora;
+                document.getElementById("gps-lat").innerText = data.lat;
+                document.getElementById("gps-lon").innerText = data.lon;
+                document.getElementById("gps-vel").innerText = data.velocidad;
+            });
+    }
+
+    setInterval(actualizarGPS, 1000);  // actualiza cada 1 segundo
+
+    // ... resto del código joystick
+    </script>
+</body>
+</html>
 
